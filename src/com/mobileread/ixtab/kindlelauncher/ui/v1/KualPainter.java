@@ -1,6 +1,7 @@
 package com.mobileread.ixtab.kindlelauncher.ui.v1;
 
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 
@@ -61,9 +62,17 @@ public class KualPainter {
 				textY = getCenteredTextYPosition(fonts.unicodeFontMetrics,
 						component.getHeight());
 			}
-			for (int i = 0; i < chars.length; ++i) {
-				graphics.setFont(fonts.getFontFor(chars[i]));
-				graphics.drawChars(chars, i, 1, textX + offsets[i], textY);
+			// C-3: batch consecutive same-font chars into one setFont + drawChars
+			// call (pixel-identical: offsets are cumulative char widths)
+			int i = 0;
+			while (i < chars.length) {
+				Font runFont = fonts.getFontFor(chars[i]);
+				int start = i;
+				while (i < chars.length && fonts.getFontFor(chars[i]) == runFont) {
+					++i;
+				}
+				graphics.setFont(runFont);
+				graphics.drawChars(chars, start, i - start, textX + offsets[start], textY);
 			}
 		}
 	}

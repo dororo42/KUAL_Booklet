@@ -784,8 +784,11 @@ public class KualKindlet extends SuicidalKindlet implements ActionListener {
 			// Default value for afterParser, cf. refreshMenu().
 			long afterParser = 750L;
 			// Add 750ms for legacy devices with slower CPU
+			// C-2 (OPTIONAL, only if on-device testing shows K4 refresh frame drops):
+			// include K4 in the slow-CPU list.
 			String model = kualMenu.getModel();
-			if ("K2".equals(model) || "DX".equals(model) || "DXG".equals(model) || "K3".equals(model)) {
+			if ("K2".equals(model) || "DX".equals(model) || "DXG".equals(model) || "K3".equals(model)
+					|| "K4".equals(model)) {
 				afterParser += 750L;
 			}
 			// If we showed a custom status message, don't overwrite it!
