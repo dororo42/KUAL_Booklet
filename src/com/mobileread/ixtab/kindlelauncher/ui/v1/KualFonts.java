@@ -16,6 +16,10 @@ public class KualFonts {
 
 	private static final Map INSTANCES = new HashMap();
 
+	// C-3: cache per-string glyph offsets; labels are a small finite set per session,
+	// and calculateOffsets() re-measures every char on every repaint otherwise.
+	private final Map OFFSET_CACHE = new HashMap();
+
 	private KualFonts(Font defaultFont, FontMetrics defaultFontMetrics,
 			Font unicodeFont, FontMetrics unicodeFontMetrics) {
 		super();
@@ -87,6 +91,11 @@ public class KualFonts {
 	}
 
 	public int[] calculateOffsets(char[] chars) {
+		String key = new String(chars);
+		int[] cached = (int[]) OFFSET_CACHE.get(key);
+		if (cached != null) {
+			return cached;
+		}
 		int[] offsets = new int[chars.length + 1];
 		FontMetrics fm;
 		for (int i = 1; i <= chars.length; ++i) {
@@ -94,6 +103,7 @@ public class KualFonts {
 			fm = isUnicode(c) ? unicodeFontMetrics : defaultFontMetrics;
 			offsets[i] = offsets[i - 1] + fm.charWidth(c);
 		}
+		OFFSET_CACHE.put(key, offsets);
 		return offsets;
 	}
 
