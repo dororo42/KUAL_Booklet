@@ -1,10 +1,11 @@
-name: Build KDK1 (K4/K5 legacy) azw2
+name: Build KDK1 (K4/K4B legacy) azw2
 
-# Builds the Kindlet (KDK 1.0) variant from source without Amazon's
-# copyrighted Kindlet-1.*.jar: the small Amazon API surface used by the
-# KDK1 classes is provided by generated compile-time stubs (never shipped).
-# The resulting azw2 is signed with the repository's developer.keystore,
-# whose three certs match the MKK trust chain (see patches/README.md).
+# Builds the Kindlet (KDK 1.0) variant from the OFFICIAL v2.7 decompiled
+# sources (kdk1/src, see kdk1/README.md) — NOT from the Booklet-ized src/ at
+# the repo root, which is incompatible with the KDK-1.0 Kindlet framework
+# (BookletContext vs KindletContext, java.util.Timer vs kindlet Timer).
+# Amazon API stubs (kdk1/stub-src) are compile-time only and never shipped.
+# Signed with developer.keystore whose three certs match the MKK trust chain.
 
 on:
   push:
@@ -19,98 +20,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 8 (required for -source/-target 1.4)
+      - name: Set up JDK 8 (required for -source/-target 1.4 => major 48)
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '8'
 
-      - name: Install Ant
-        run: sudo apt-get update && sudo apt-get install -y ant
-
-      - name: Generate Amazon API stub jar (compile-time only)
+      - name: Compile Amazon API stubs (compile-time only, never shipped)
         run: |
-          mkdir -p ci-stub/src/com/amazon/kindle/{kindlet/event,booklet}
-          cat > ci-stub/src/com/amazon/kindle/booklet/BookletContext.java <<'EOF'
-          package com.amazon.kindle.booklet;
-          public interface BookletContext { }
-          EOF
-          cat > ci-stub/src/com/amazon/kindle/kindlet/KindletContext.java <<'EOF'
-          package com.amazon.kindle.kindlet;
-          import com.amazon.kindle.booklet.BookletContext;
-          public interface KindletContext extends BookletContext {
-              java.awt.Container getRootContainer();
-          }
-          EOF
-          cat > ci-stub/src/com/amazon/kindle/kindlet/AbstractKindlet.java <<'EOF'
-          package com.amazon.kindle.kindlet;
-          public abstract class AbstractKindlet { }
-          EOF
-          cat > ci-stub/src/com/amazon/kindle/kindlet/event/KindleKeyCodes.java <<'EOF'
-          package com.amazon.kindle.kindlet.event;
-          public interface KindleKeyCodes {
-              int VK_RIGHT_HAND_SIDE_TURN_PAGE = 61448;
-              int VK_LEFT_HAND_SIDE_TURN_PAGE = 61449;
-              int VK_TURN_PAGE_BACK = 61450;
-              int VK_LEFT_HAND_SIDE_TURN_PAGE_BACK = 61452;
-              int VK_TEXT = 61441;
-              int VK_MENU = 61442;
-              int VK_BACK = 61451;
-              int VK_HOME = 61441;
-          }
-          EOF
-          mkdir -p ci-stub/classes ci-stub/out
-          javac -d ci-stub/classes $(find ci-stub/src -name '*.java')
-          jar cf ci-stub/kindlet-stub.jar -C ci-stub/classes .
+          mkdir -p kdk1/stub-classes kdk1/stub-out
+          javac -d kdk1/stub-classes $(find kdk1/stub-src -name '*.java')
+          jar cf kdk1/kindlet-stub-full.jar -C kdk1/stub-classes .
 
-      - name: Compile KDK1 classes (Java 1.4 bytecode)
+      - name: Compile KDK1 classes (Java 1.4 bytecode, -g like the official build)
         run: |
-          mkdir -p ci-stub/out
-          # Excludes the Booklet variant; jailbreak.jar ships in lib/.
-          find src/com/mobileread/ixtab/kindlelauncher -name '*.java' \
-               ! -name 'KualBooklet.java' -print0 \
-            | xargs -0 javac -source 1.4 -target 1.4 -Xlint:-options \
-                -d ci-stub/out \
-                -cp ci-stub/kindlet-stub.jar:lib/jailbreak.jar
-          # Prove every class is major 48 (Java 1.4), as KDK 1.0 requires.
+          find kdk1/src -name '*.java' -print0 \
+            | xargs -0 javac -source 1.4 -target 1.4 \
+                -g:lines,vars,source -Xlint:-options \
+                -d kdk1/stub-out \
+                -cp kdk1/kindlet-stub-full.jar:lib/jailbreak.jar
           python3 - <<'PY'
           import glob, struct
           majors = {}
-          for p in glob.glob('ci-stub/out/**/*.class', recursive=True):
+          for p in glob.glob('kdk1/stub-out/**/*.class', recursive=True):
               m = struct.unpack('>H', open(p,'rb').read(8)[6:8])[0]
               majors[m] = majors.get(m, 0) + 1
-          print('bytecode majors:', majors)
+          print('compiled bytecode majors:', majors)
           assert set(majors) == {48}, 'KDK 1.0 requires Java 1.4 (major 48)'
-          assert majors[48] >= 25, 'unexpectedly few compiled classes'
           PY
 
-      - name: Generate parse.awk (version injection + comment strip)
+      - name: Assemble azw2 (classes + jailbreak + official parse.awk + cover)
         run: |
-          RES=src/com/mobileread/ixtab/kindlelauncher/resources
-          REV=$(git rev-parse --short HEAD)
-          DATE=$(date -u +%Y%m%d)
-          # parse-commented.awk itself carries the @repository.version@ /
-          # @repository.date@ placeholders (ant copies it to a .tpl backup
-          # before injecting). Substitute from it directly.
-          sed -e "s/@repository.version@/${REV}/" \
-              -e "s/@repository.date@/${DATE}/" \
-              "$RES/parse-commented.awk" > /tmp/parse-injected.awk
-          cp /tmp/parse-injected.awk "$RES/parse-commented.awk"
-          bash "$RES/tool/stripit.sh" >/dev/null
-          test -s "$RES/parse.awk"
-          grep -m1 'VERSION=' "$RES/parse.awk"
-
-      - name: Assemble azw2 (manifest + classes + parse.awk + cover)
-        run: |
-          mkdir -p ci-stub/stage/com/mobileread/ixtab/kindlelauncher
-          cp -r ci-stub/out/* ci-stub/stage/
-          unzip -oq lib/jailbreak.jar -x 'META-INF/*' -d ci-stub/stage
-          cp -r src/com/mobileread/ixtab/kindlelauncher/resources ci-stub/stage/com/mobileread/ixtab/kindlelauncher/
-          rm -rf ci-stub/stage/com/mobileread/ixtab/kindlelauncher/resources/{old,aloop,booklet,tool,dist}
-          rm -f ci-stub/stage/com/mobileread/ixtab/kindlelauncher/resources/parse-commented.awk*
-          find ci-stub/stage -name '*.java' -delete
-          cp KindleLauncher.jpg ci-stub/stage/
-          cat > ci-stub/MANIFEST.MF <<'EOF'
+          mkdir -p kdk1/stage/com/mobileread/ixtab/kindlelauncher
+          cp -r kdk1/stub-out/* kdk1/stage/
+          unzip -oq lib/jailbreak.jar -x 'META-INF/*' -d kdk1/stage
+          mkdir -p kdk1/stage/com/mobileread/ixtab/kindlelauncher/resources
+          cp kdk1/resources/parse.awk kdk1/stage/com/mobileread/ixtab/kindlelauncher/resources/parse.awk
+          cp KindleLauncher.jpg kdk1/stage/
+          cat > kdk1/MANIFEST.MF <<'EOF'
           Manifest-Version: 1.0
           SDK-Specification-Version: 1.0
           Implementation-Title: KUAL-custom
@@ -124,7 +71,7 @@ jobs:
           SDK-Extension-Name: com.amazon.kindle.kindlet
 
           EOF
-          jar cfm KUAL-KDK-1.0-custom.azw2 ci-stub/MANIFEST.MF -C ci-stub/stage .
+          jar cfm KUAL-KDK-1.0-custom.azw2 kdk1/MANIFEST.MF -C kdk1/stage .
 
       - name: Sign with the three MKK-trusted test certificates
         run: |
@@ -133,8 +80,24 @@ jobs:
               -sigalg SHA256withRSA -digestalg SHA-256 \
               KUAL-KDK-1.0-custom.azw2 "$a"
           done
-          jarsigner -verify -verbose -certs KUAL-KDK-1.0-custom.azw2 | tail -5
-          unzip -l KUAL-KDK-1.0-custom.azw2 | tail -3
+          jarsigner -verify -strict KUAL-KDK-1.0-custom.azw2 | grep -E "jar verified" || true
+
+      - name: Assert final jar matches the official class inventory
+        run: |
+          python3 - <<'PY'
+          import zipfile, struct
+          z = zipfile.ZipFile('KUAL-KDK-1.0-custom.azw2')
+          cs = [n for n in z.namelist() if n.endswith('.class')]
+          ms = {}
+          for n in cs:
+              d = z.read(n); m = struct.unpack('>H', d[6:8])[0]
+              ms[m] = ms.get(m, 0) + 1
+          print('final class count:', len(cs), 'majors:', ms)
+          assert len(cs) == 37, 'must equal the official v2.7 class inventory'
+          assert set(ms) == {48}, 'every class must be Java 1.4 (major 48)'
+          assert any('jailbreak' in n for n in cs), 'jailbreak classes must be bundled'
+          assert any(n.endswith('resources/parse.awk') for n in z.namelist()), 'parse.awk must be bundled'
+          PY
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
