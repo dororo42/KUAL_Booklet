@@ -104,14 +104,16 @@ jobs:
         run: |
           mkdir -p ci-stub/stage/com/mobileread/ixtab/kindlelauncher
           cp -r ci-stub/out/* ci-stub/stage/
+          unzip -oq lib/jailbreak.jar -x 'META-INF/*' -d ci-stub/stage
           cp -r src/com/mobileread/ixtab/kindlelauncher/resources ci-stub/stage/com/mobileread/ixtab/kindlelauncher/
           rm -rf ci-stub/stage/com/mobileread/ixtab/kindlelauncher/resources/{old,aloop,booklet,tool,dist}
           rm -f ci-stub/stage/com/mobileread/ixtab/kindlelauncher/resources/parse-commented.awk*
+          find ci-stub/stage -name '*.java' -delete
           cp KindleLauncher.jpg ci-stub/stage/
           cat > ci-stub/MANIFEST.MF <<'EOF'
           Manifest-Version: 1.0
           SDK-Specification-Version: 1.0
-          Implementation-Title: KUAL
+          Implementation-Title: KUAL-custom
           Implementation-Version: 2.7
           Implementation-Vendor: ixtab NiLuJe twobob stepk
           Main-Class: com.mobileread.ixtab.kindlelauncher.KualKindlet
