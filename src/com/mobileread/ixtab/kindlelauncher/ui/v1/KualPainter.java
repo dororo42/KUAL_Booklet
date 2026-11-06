@@ -63,7 +63,9 @@ public class KualPainter {
 						component.getHeight());
 			}
 			// C-3: batch consecutive same-font chars into one setFont + drawChars
-			// call (pixel-identical: offsets are cumulative char widths)
+			// call (pixel-identical: offsets are cumulative char widths).
+			// getFontFor() returns one of two instance fields, so identity
+			// comparison is stable for the lifetime of this KualFonts instance.
 			int i = 0;
 			while (i < chars.length) {
 				Font runFont = fonts.getFontFor(chars[i]);

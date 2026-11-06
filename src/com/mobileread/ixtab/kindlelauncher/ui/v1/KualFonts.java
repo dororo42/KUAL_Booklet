@@ -16,9 +16,11 @@ public class KualFonts {
 
 	private static final Map INSTANCES = new HashMap();
 
-	// C-3: cache per-string glyph offsets; labels are a small finite set per session,
-	// and calculateOffsets() re-measures every char on every repaint otherwise.
+	// C-3: cache per-string glyph offsets; calculateOffsets() otherwise
+	// re-measures every char on every repaint. Bounded to avoid unbounded
+	// growth when menus are regenerated (mru sorting, dynamic status labels).
 	private final Map OFFSET_CACHE = new HashMap();
+	private static final int OFFSET_CACHE_LIMIT = 256;
 
 	private KualFonts(Font defaultFont, FontMetrics defaultFontMetrics,
 			Font unicodeFont, FontMetrics unicodeFontMetrics) {
@@ -94,7 +96,7 @@ public class KualFonts {
 		String key = new String(chars);
 		int[] cached = (int[]) OFFSET_CACHE.get(key);
 		if (cached != null) {
-			return cached;
+			return copy(cached);
 		}
 		int[] offsets = new int[chars.length + 1];
 		FontMetrics fm;
@@ -103,8 +105,17 @@ public class KualFonts {
 			fm = isUnicode(c) ? unicodeFontMetrics : defaultFontMetrics;
 			offsets[i] = offsets[i - 1] + fm.charWidth(c);
 		}
-		OFFSET_CACHE.put(key, offsets);
+		if (OFFSET_CACHE.size() >= OFFSET_CACHE_LIMIT) {
+			OFFSET_CACHE.clear();
+		}
+		OFFSET_CACHE.put(key, copy(offsets));
 		return offsets;
+	}
+
+	private static int[] copy(int[] values) {
+		int[] result = new int[values.length];
+		System.arraycopy(values, 0, result, 0, values.length);
+		return result;
 	}
 
 	public Font getFontFor(char c) {
