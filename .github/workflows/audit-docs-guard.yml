@@ -1,0 +1,70 @@
+name: KUAL audit docs guard
+
+# This branch is a sanitized archive of the KUAL-K4/K5 audit workspace.
+# It must never contain developer credentials or local handoff documents.
+
+on:
+  push:
+    branches: ['audit/docs']
+  pull_request:
+    branches: ['audit/docs']
+  workflow_dispatch:
+
+jobs:
+  guard:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Forbid credentials and handoff documents
+        run: |
+          python3 - <<'PY'
+          import os
+          forbidden = []
+          total = 0
+          for root, dirs, files in os.walk('.'):
+              if '.git' in dirs:
+                  dirs.remove('.git')
+              if 'handoffs' in dirs:
+                  forbidden.append(os.path.join(root, 'handoffs') + '/')
+                  dirs.remove('handoffs')
+              for f in files:
+                  total += 1
+                  p = os.path.join(root, f)
+                  low = f.lower()
+                  if (p.endswith(('.p12', '.pfx', '.keystore', '.pem', '.key', '.jks'))
+                          or low.startswith('id_rsa') or 'secret' in low
+                          or 'token' in low or low.endswith('.env')):
+                      forbidden.append(p)
+          print('scanned files:', total)
+          assert not forbidden, 'forbidden files present: ' + ', '.join(forbidden)
+          print('PASS: no credentials, no handoff documents')
+          PY
+
+      - name: Verify archived v5 azw2 keeps the KDK-1.0 ABI
+        run: |
+          python3 - <<'PY'
+          import hashlib, struct, zipfile
+          p = 'ci-artifact/v5/KUAL-KDK-1.0-custom.azw2'
+          z = zipfile.ZipFile(p)
+          names = z.namelist()
+          cs = [n for n in names if n.endswith('.class')]
+          assert len(names) == 58, 'entry count != official v2.7'
+          assert len(cs) == 37, 'class count != official v2.7'
+          assert {struct.unpack('>H', z.read(n)[6:8])[0] for n in cs} == {48}
+          blob = b''.join(z.read(n) for n in cs)
+          assert b'com/amazon/kindle/booklet' not in blob, 'Booklet API leaked'
+          kta = 'com/mobileread/ixtab/kindlelauncher/timer/KTimerAdapter.class'
+          assert b'com/amazon/kindle/kindlet/util/Timer' in z.read(kta)
+          paw = 'com/mobileread/ixtab/kindlelauncher/resources/parse.awk'
+          assert hashlib.sha256(z.read(paw)).hexdigest() == \
+              '829c0209ec9f91b9a8dae799d7c97d8507dbee0647f520b3bd89701f81a493d0'
+          assert len([n for n in names if n.endswith('.RSA')]) == 3
+          print('PASS: archived azw2 matches official v2.7 ABI')
+          PY
+
+      - name: Archive summary
+        run: |
+          echo "tracked files: $(git ls-files | wc -l)"
+          echo "v5 sha256: $(sha256sum ci-artifact/v5/KUAL-KDK-1.0-custom.azw2 | cut -d' ' -f1)"
+          tail -n 3 LOG.md

@@ -1,0 +1,33 @@
+--- upstream-kual/src/com/mobileread/ixtab/kindlelauncher/ui/v1/KualFonts.java	2025-04-19 19:14:08.000000000 +0800
++++ patches/patched-src/com/mobileread/ixtab/kindlelauncher/ui/v1/KualFonts.java	2026-11-06 07:56:34.984359237 +0800
+@@ -16,6 +16,10 @@
+ 
+ 	private static final Map INSTANCES = new HashMap();
+ 
++	// C-3: cache per-string glyph offsets; labels are a small finite set per session,
++	// and calculateOffsets() re-measures every char on every repaint otherwise.
++	private final Map OFFSET_CACHE = new HashMap();
++
+ 	private KualFonts(Font defaultFont, FontMetrics defaultFontMetrics,
+ 			Font unicodeFont, FontMetrics unicodeFontMetrics) {
+ 		super();
+@@ -87,6 +91,11 @@
+ 	}
+ 
+ 	public int[] calculateOffsets(char[] chars) {
++		String key = new String(chars);
++		int[] cached = (int[]) OFFSET_CACHE.get(key);
++		if (cached != null) {
++			return cached;
++		}
+ 		int[] offsets = new int[chars.length + 1];
+ 		FontMetrics fm;
+ 		for (int i = 1; i <= chars.length; ++i) {
+@@ -94,6 +103,7 @@
+ 			fm = isUnicode(c) ? unicodeFontMetrics : defaultFontMetrics;
+ 			offsets[i] = offsets[i - 1] + fm.charWidth(c);
+ 		}
++		OFFSET_CACHE.put(key, offsets);
+ 		return offsets;
+ 	}
+ 

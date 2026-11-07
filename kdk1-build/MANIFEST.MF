@@ -1,0 +1,12 @@
+Manifest-Version: 1.0
+SDK-Specification-Version: 1.0
+Implementation-Title: KUAL-custom
+Implementation-Version: 2.7
+Implementation-Vendor: ixtab NiLuJe twobob stepk
+Main-Class: com.mobileread.ixtab.kindlelauncher.KualKindlet
+Amazon-Cover-Image: KindleLauncher.jpg
+Toolbar-Mode: persistent
+Font-Size-Mode: point
+Extension-List: SDK
+SDK-Extension-Name: com.amazon.kindle.kindlet
+

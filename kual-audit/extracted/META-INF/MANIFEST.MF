@@ -1,0 +1,137 @@
+Manifest-Version: 1.0
+SDK-Specification-Version: 1.0
+Implementation-Title: KUAL
+Implementation-Version: 2.7
+Amazon-Cover-Image: KindleLauncher.jpg
+Extension-List: SDK
+Implementation-Vendor: ixtab NiLuJe twobob stepk
+Main-Class: com.mobileread.ixtab.kindlelauncher.KualKindlet
+Ant-Version: Apache Ant 1.10.15
+Toolbar-Mode: persistent
+Font-Size-Mode: point
+SDK-Extension-Name: com.amazon.kindle.kindlet
+Created-By: 1.8.0_442-b06 (Temurin)
+
+Name: com/mobileread/ixtab/kindlelauncher/timer/KTimerAdapter.class
+SHA-256-Digest: mGZ8sGNrKfX8omt8Sz5o7VlOwLy6ekpz5APvxhSiKpo=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/v1/KualPainter.class
+SHA-256-Digest: RNbmQG32gX+8hCgIsijix06OrKTC3ENEtJWwPHf2WGA=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/v1/KualLabel.class
+SHA-256-Digest: 7OfdJZmGL2dQOvPQ6KLl0aKjUmu25SJ2/BOBfgwebvg=
+
+Name: com/mobileread/ixtab/kindlelauncher/KualKindlet$3.class
+SHA-256-Digest: /JMsXgc+qeiX8jLzO7eDHMtkaJqLuONjAFoow2PAQ3M=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/UIAdapter.class
+SHA-256-Digest: 6ipJAWt5PGe39L12V6O8/jCjck24dDIEu3oKpXMgU0I=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/v1/KualPaintable.class
+SHA-256-Digest: Ock8CiM5XCBI2jFtGDK15tE1iph26wsmMwWeTD6vx4g=
+
+Name: ixtab/jailbreak/Jailbreak.class
+SHA-256-Digest: zqLw2AVqy3m2YA1kMqinU/tKTR5sToWTEtaUtfODAVI=
+
+Name: com/mobileread/ixtab/kindlelauncher/resources/MailboxProcessor.c
+ lass
+SHA-256-Digest: AyDdnPUM67xgWmzsMJMlQdyO1i/MUxJDJBfZ4LocmvU=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/v1/KualFonts.class
+SHA-256-Digest: /bZz2+/FY2K9fFx/ZqLYJ2MwMOoe8RJv7HenpYtCOGg=
+
+Name: ixtab/jailbreak/Jailbreak$Metadata.class
+SHA-256-Digest: UTOgRqX+F/9yqrzlrr2PqsUR9BKydTNN4JCxmynW6K0=
+
+Name: ixtab/jailbreak/JailbreakConstants$Protocol.class
+SHA-256-Digest: 4hOM21YQqSO0f4Ya/1LAE8/7Vvue86uQo4bCf+w8vlM=
+
+Name: com/mobileread/ixtab/kindlelauncher/resources/KualConfig.class
+SHA-256-Digest: gdKaoJODsMtXffz+EPzCKoAHdmCKROqEHEPa165IUjY=
+
+Name: com/mobileread/ixtab/kindlelauncher/KualKindlet$1.class
+SHA-256-Digest: cLeqJUAwXc3VqHoaiEWHZb544g1AaJ6tSste+o/CFIQ=
+
+Name: ixtab/jailbreak/JailbreakConstants.class
+SHA-256-Digest: dANF1tFzJCcYIGQoqOi5Zfjy2aAb0CWwHZDjIp1FTp8=
+
+Name: com/mobileread/ixtab/kindlelauncher/KualKindlet$ReloadMenuFromCa
+ che.class
+SHA-256-Digest: cPxcIErtl54PKz3Y/3zLIOBXYjP4u96Dpk8S9PzLIXQ=
+
+Name: com/mobileread/ixtab/kindlelauncher/timer/TimerAdapter.class
+SHA-256-Digest: R4Zi1pVjnYgKJCgvn9gFJ8vYoJEtv+JkxmxN1U6rZuY=
+
+Name: com/mobileread/ixtab/kindlelauncher/Util.class
+SHA-256-Digest: UP8+uGFLCCTOL7eRlzKs9AhUAttA4Yp0eWmurqUQE2M=
+
+Name: ixtab/jailbreak/Jailbreak$Accessor.class
+SHA-256-Digest: xYt9qxFds0TUPT0D9hugVX1lWMkdLBtV7t+SpRK1uU4=
+
+Name: com/mobileread/ixtab/kindlelauncher/resources/KualLog.class
+SHA-256-Digest: 3fI10PTYE6MYuipllyLFeazduVMMah8tjzPdpjMIQYI=
+
+Name: ixtab/jailbreak/Jailbreak$Context.class
+SHA-256-Digest: iencn2nUsm0T+x+QsYz2cB1IfYQJclrAOdcDztyeG0A=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/GapComponent.class
+SHA-256-Digest: aum1JbiffgxzinLY25VI07sx3xB5qDK1LIdI02ODZ60=
+
+Name: ixtab/jailbreak/SuicidalKindlet.class
+SHA-256-Digest: KkCGnQresZslQCFAnTHEOVCHghkVyM1j/P148NK/xuQ=
+
+Name: KindleLauncher.jpg
+SHA-256-Digest: MbWMPozWSamG7mS7f+GwlhRQYHZX1zcsYxv89KmMgWg=
+
+Name: com/mobileread/ixtab/kindlelauncher/timer/JTimerAdapter.class
+SHA-256-Digest: GTAc9p+dxS9lV8hmboFjl6C//2zDJrtUU9X0qC/TpSw=
+
+Name: com/mobileread/ixtab/kindlelauncher/KualKindlet.class
+SHA-256-Digest: lYJ5xgP8bi8QojfmVM9ShOEHVJ7FE1njpPHxxTIVf4k=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/v1/KualButton.class
+SHA-256-Digest: ah7DCFzI53MTzPrbos8OdGCdyPA5yWALfnKr9Q3YIIE=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/v1/KUIAdapter.class
+SHA-256-Digest: sg+1D0bUGTOpdpPYkA+QorqmqeyF7KwkdDvjRjxvJUU=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/v2/JUIAdapter.class
+SHA-256-Digest: s9FdGmfrQaWcArRuais5SOeoYIeDeOq0ZYUHgcgdmtw=
+
+Name: com/mobileread/ixtab/kindlelauncher/KualKindlet$2.class
+SHA-256-Digest: 8CalwFubzUX4TCx2RAa6uszyjOS26/aXvAOVpe7hSGc=
+
+Name: com/mobileread/ixtab/kindlelauncher/resources/KualMenu.class
+SHA-256-Digest: g8/EpaE5m0XZTWF/rnn0W0LhJCxC00DgElWNLaNylqc=
+
+Name: com/mobileread/ixtab/kindlelauncher/LauncherKindletJailbreak.cla
+ ss
+SHA-256-Digest: cXmg3Ct07VLaU25wVGncPZqC8M4aw2FiBNwcVRgSpVI=
+
+Name: com/mobileread/ixtab/kindlelauncher/timer/KTimerAdapter$1.class
+SHA-256-Digest: EtcpFQUOry6WUnEFdLSS3aUFZmNQzshFDx/aeGL6K1U=
+
+Name: com/mobileread/ixtab/kindlelauncher/ui/v2/KualButton.class
+SHA-256-Digest: 6hGqIikssn3WM4/lTzmLhv356dTkFnUbYabi/YUtdRs=
+
+Name: com/mobileread/ixtab/kindlelauncher/resources/MailboxProcessor$1
+ .class
+SHA-256-Digest: fWnG/WSOmJlaX6xY1UlzvVNLe/9ECDT/sslVsNR1jL4=
+
+Name: com/mobileread/ixtab/kindlelauncher/resources/KualEntry.class
+SHA-256-Digest: Pjw7u4ZTUUrdiiBBSFv/MjcYyqs62Pa2qvfLFyPxEzM=
+
+Name: com/mobileread/ixtab/kindlelauncher/resources/parse.awk
+SHA-256-Digest: gpwCCeyfkbmo2ueZ18l9hQfb7gZH9SCzvYlwH4Gkk9A=
+
+Name: com/mobileread/ixtab/kindlelauncher/resources/ResourceLoader.cla
+ ss
+SHA-256-Digest: U2IDe0NxLxkE+TwktUmtKMg10hIgbngHRhequm8yNMo=
+
+Name: com/mobileread/ixtab/kindlelauncher/timer/JTimerAdapter$1.class
+SHA-256-Digest: Cu0RJLgdqHFPukw21w+woqskTpJeckoT73i9IWWMhMw=
+
+Name: com/mobileread/ixtab/kindlelauncher/resources/MailboxCommand.cla
+ ss
+SHA-256-Digest: k31ZvmQVYebAj9lcEHMc7g0CW0/xAtupY7w3em594xA=
+
