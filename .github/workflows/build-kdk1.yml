@@ -54,6 +54,7 @@ jobs:
           mkdir -p kdk1/stage/com/mobileread/ixtab/kindlelauncher
           cp -r kdk1/stub-out/* kdk1/stage/
           unzip -oq lib/jailbreak.jar -x 'META-INF/*' -d kdk1/stage
+          find kdk1/stage -name '*.java' -delete
           mkdir -p kdk1/stage/com/mobileread/ixtab/kindlelauncher/resources
           cp kdk1/resources/parse.awk kdk1/stage/com/mobileread/ixtab/kindlelauncher/resources/parse.awk
           cp KindleLauncher.jpg kdk1/stage/
@@ -82,21 +83,52 @@ jobs:
           done
           jarsigner -verify -strict KUAL-KDK-1.0-custom.azw2 | grep -E "jar verified" || true
 
-      - name: Assert final jar matches the official class inventory
+      - name: Assert KDK-1.0 ABI parity with official v2.7
         run: |
           python3 - <<'PY'
-          import zipfile, struct
-          z = zipfile.ZipFile('KUAL-KDK-1.0-custom.azw2')
-          cs = [n for n in z.namelist() if n.endswith('.class')]
-          ms = {}
-          for n in cs:
-              d = z.read(n); m = struct.unpack('>H', d[6:8])[0]
-              ms[m] = ms.get(m, 0) + 1
-          print('final class count:', len(cs), 'majors:', ms)
-          assert len(cs) == 37, 'must equal the official v2.7 class inventory'
-          assert set(ms) == {48}, 'every class must be Java 1.4 (major 48)'
-          assert any('jailbreak' in n for n in cs), 'jailbreak classes must be bundled'
-          assert any(n.endswith('resources/parse.awk') for n in z.namelist()), 'parse.awk must be bundled'
+          import hashlib, struct, zipfile
+
+          # sha256 of the official v2.7 parse.awk shipped in kdk1/resources
+          OFFICIAL_PARSE_AWK_SHA256 = "829c0209ec9f91b9a8dae799d7c97d8507dbee0647f520b3bd89701f81a493d0"
+
+
+          def check(path):
+              z = zipfile.ZipFile(path)
+              names = z.namelist()
+              cs = [n for n in names if n.endswith('.class')]
+              rsa = [n for n in names if n.endswith('.RSA')]
+              print("%s: %d entries, %d classes, %d signatures" % (path, len(names), len(cs), len(rsa)))
+
+              problems = []
+
+              def ok(label, cond, detail=""):
+                  print(("PASS " if cond else "FAIL ") + label + ((" :: " + detail) if detail else ""))
+                  if not cond:
+                      problems.append(label + ((" :: " + detail) if detail else ""))
+
+              ok("entry inventory equals official v2.7 (58)", len(names) == 58, str(len(names)))
+              ok("class inventory equals official v2.7 (37)", len(cs) == 37, str(len(cs)))
+              ok("every class is Java 1.4 (major 48)",
+                 {struct.unpack('>H', z.read(n)[6:8])[0] for n in cs} == {48})
+              stray = [n for n in names if n.endswith('.java')]
+              ok("no stray .java sources from jailbreak.jar", not stray, ",".join(stray))
+              blob = b"".join(z.read(n) for n in cs)
+              ok("no Booklet API (com/amazon/kindle/booklet) in classes",
+                 b"com/amazon/kindle/booklet" not in blob)
+              kta = "com/mobileread/ixtab/kindlelauncher/timer/KTimerAdapter.class"
+              ok("KTimerAdapter uses com.amazon.kindle.kindlet.util.Timer",
+                 b"com/amazon/kindle/kindlet/util/Timer" in z.read(kta))
+              ok("7 ixtab/jailbreak classes bundled",
+                 len([n for n in cs if n.startswith("ixtab/jailbreak/")]) == 7)
+              paw = "com/mobileread/ixtab/kindlelauncher/resources/parse.awk"
+              ok("parse.awk byte-identical to official v2.7",
+                 hashlib.sha256(z.read(paw)).hexdigest() == OFFICIAL_PARSE_AWK_SHA256)
+              ok("three developer signatures present", len(rsa) == 3, ",".join(rsa))
+              assert not problems, "%d ABI gate failure(s): %s" % (len(problems), " | ".join(problems))
+              print("ABI GATE PASS: " + path)
+
+
+          check('KUAL-KDK-1.0-custom.azw2')
           PY
 
       - name: Upload artifact
