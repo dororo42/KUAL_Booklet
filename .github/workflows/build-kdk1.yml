@@ -61,7 +61,7 @@ jobs:
           cat > kdk1/MANIFEST.MF <<'EOF'
           Manifest-Version: 1.0
           SDK-Specification-Version: 1.0
-          Implementation-Title: KUAL-custom
+          Implementation-Title: KUAL-neo
           Implementation-Version: 2.7
           Implementation-Vendor: ixtab NiLuJe twobob stepk
           Main-Class: com.mobileread.ixtab.kindlelauncher.KualKindlet
@@ -72,16 +72,16 @@ jobs:
           SDK-Extension-Name: com.amazon.kindle.kindlet
 
           EOF
-          jar cfm KUAL-KDK-1.0-custom.azw2 kdk1/MANIFEST.MF -C kdk1/stage .
+          jar cfm KUAL-neo.azw2 kdk1/MANIFEST.MF -C kdk1/stage .
 
       - name: Sign with the three MKK-trusted test certificates
         run: |
           for a in dktest ditest dntest; do
             jarsigner -keystore developer.keystore -storepass password \
               -sigalg SHA256withRSA -digestalg SHA-256 \
-              KUAL-KDK-1.0-custom.azw2 "$a"
+              KUAL-neo.azw2 "$a"
           done
-          jarsigner -verify -strict KUAL-KDK-1.0-custom.azw2 | grep -E "jar verified" || true
+          jarsigner -verify -strict KUAL-neo.azw2 | grep -E "jar verified" || true
 
       - name: Assert KDK-1.0 ABI parity with official v2.7
         run: |
@@ -128,11 +128,11 @@ jobs:
               print("ABI GATE PASS: " + path)
 
 
-          check('KUAL-KDK-1.0-custom.azw2')
+          check('KUAL-neo.azw2')
           PY
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: KUAL-KDK-1.0-custom
-          path: KUAL-KDK-1.0-custom.azw2
+          path: KUAL-neo.azw2
