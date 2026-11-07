@@ -98,6 +98,33 @@ http://www.mobileread.com/forums/showpost.php?p=2636883&postcount=59
 
 
 ##############################################
+# KUAL-neo (what it is / what changed)       #
+##############################################
+What it is:
+  A rebuild of the KDK-1.0 kindlet for K2/DX/K3/K4 (incl. the black
+  Kindle 5, 5th Gen "K4B") from the official v2.7 azw2 decompiled
+  sources (see kdk1/ in the repo; CI asserts the 37-class inventory,
+  all Java 1.4), signed with the same MKK-trusted developer keys.
+
+Install (coexists with the original):
+  Drop KUAL-neo.azw2 into documents/ next to KUAL-KDK-1.0.azw2.
+  The shelf shows "KUAL-neo" next to "KUAL".
+  Deleting either azw2 rolls that one back, the other is untouched.
+
+What changed (two UI-layer patches, pixel-identical):
+  1) ui/v1/KualFonts: per-label glyph offset cache (bounded 256,
+     defensive copies) instead of re-measuring on every repaint
+  2) ui/v1/KualPainter: consecutive same-font chars drawn in one
+     setFont+drawChars run instead of one call per char
+  3) Optional: K4 joins the +750ms slow-CPU refresh buffer (kept
+     after on-device testing)
+  Note: the gawk fast path is unchanged (/mnt/us/extensions/gawk/bin/gawk).
+
+Verified on device (K4 + black K5):
+  B1-B6 all green on both; gawk fingerprint "(20250419,g)" on both;
+  benchmark 60/60 no errors; KOReader exits with code 0.
+
+##############################################
 # KUAL-neo (中文说明 / Chinese notes)        #
 ##############################################
 KUAL-neo 是什么：
